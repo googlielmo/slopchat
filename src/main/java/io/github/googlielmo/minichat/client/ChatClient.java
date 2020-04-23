@@ -5,96 +5,96 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ChatClient {
 
-    public static final int PORT = 10000;
-
     private static final Logger logger = Logger.getLogger("ChatClient");
 
-    Socket socket = null;
-    BufferedReader consoleReader = null;
-    BufferedReader socketReader = null;
-    PrintWriter socketWriter = null;
+    private final ChatEventHandler eventHandler;
+
+    private Socket socket = null;
+
+    private BufferedReader socketReader = null;
+
+    private PrintWriter socketWriter = null;
+
     private String serverName;
 
-    public ChatClient() {
-        serverName = "localhost";
+    private int port;
+
+    private boolean connected;
+
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    public ChatClient(String serverName, int port, ChatEventHandler eventHandler) {
+        this.serverName = serverName;
+        this.port = port;
+        this.eventHandler = eventHandler;
     }
 
-    public static void main(String[] args) throws IOException {
-        new ChatClient()
-                .withConfig(args)
-                .runClient();
-    }
-
-    private ChatClient withConfig(String[] args) {
-        if (args.length == 1) {
-            serverName = args[0];
-        }
-        return this;
-    }
-
-    public void runClient() throws IOException {
+    public void connect() throws IOException {
+        connected = false;
         try {
-            socket = new Socket(serverName, PORT);
-            consoleReader = new BufferedReader(new InputStreamReader(System.in));
+            socket = new Socket(serverName, port);
             socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             socketWriter = new PrintWriter(socket.getOutputStream());
+            startReceiver();
+            connected = true;
+            eventHandler.onConnect();
         } catch (IOException e) {
-            // cannot connect to server, quit
             logger.log(Level.SEVERE, "Cannot connect to server", e);
-            return;
-        }
-
-        final Thread receiver = startReceiver();
-
-        System.out.println("Connected! ^C to quit");
-        try {
-            while (true) {
-                // read message from console
-                String message = consoleReader.readLine();
-                socketWriter.println(message);
-                socketWriter.flush();
-            }
-        } catch (IOException e) {
-            logger.log(Level.WARNING, "Error sending to server", e);
-        } finally {
-            receiver.interrupt();
-            socketReader.close();
-            socketWriter.close();
-            consoleReader.close();
-            socket.close();
+            throw e;
         }
     }
 
-    private Thread startReceiver() {
-        final Thread receiver = new Thread(() -> {
+    public void sendMessage(String message) {
+        socketWriter.println(message);
+        socketWriter.flush();
+    }
+
+    public void disconnect() {
+        executorService.shutdownNow();
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Cannot close socket", e);
+            }
+        }
+        connected = false;
+        eventHandler.onDisconnect();
+    }
+
+    private void startReceiver() {
+        final Runnable receiver = () -> {
             while (true) {
                 if (Thread.interrupted()) {
-                    logger.fine("Receiving thread interrupted");
+                    logger.fine("Receiver interrupted");
                     break;
                 }
                 try {
                     String message = socketReader.readLine();
                     logger.fine("Received : " + message);
-                    // print message to console
-                    System.out.println(message);
+                    // send message event
+                    eventHandler.onMessage(message);
                     if (message == null) {
-                        logger.warning("`null` received, quitting");
-                        return;
+                        logger.warning("`null` received, disconnecting");
+                        disconnect();
                     }
                 } catch (IOException e) {
-                    // quit receiving thread
-                    logger.log(Level.SEVERE, "Error receiving from server", e);
-                    return;
+                    logger.log(Level.SEVERE, "Error receiving from server, terminating", e);
+                    disconnect();
                 }
             }
-        }
-        );
-        receiver.start();
-        return receiver;
+        };
+        executorService.execute(receiver);
+    }
+
+    public boolean isConnected() {
+        return connected;
     }
 }

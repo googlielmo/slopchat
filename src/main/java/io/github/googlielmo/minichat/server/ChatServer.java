@@ -5,58 +5,86 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ChatServer {
 
-    public static final int PORT = 10000;
-
     private static final Logger logger = Logger.getLogger("ChatServer");
 
-    Collection<ClientHandler> clientHandlers = new ConcurrentLinkedQueue<>();
+    private Collection<ClientHandler> clientHandlers = new ConcurrentLinkedQueue<>();
 
-    public void runServer() {
-        ServerSocket serverSocket = null;
-        Socket socket = null;
+    private ExecutorService executorService = Executors.newCachedThreadPool();
+
+    private int port;
+
+    public ChatServer() {
+        this(10000);
+    }
+
+    public ChatServer(int port) {
+        this.port = port;
+    }
+
+    /**
+     * Chat server main loop:
+     * - accept new connections
+     * - start a new thread per client
+     */
+    public void serve() {
+        ServerSocket serverSocket;
 
         try {
-            serverSocket = new ServerSocket(PORT);
-            logger.info("Listening to port " + PORT);
+            serverSocket = new ServerSocket(port);
+            logger.info("Listening to port " + port);
         } catch (IOException e) {
             // port not available, quit
-            logger.log(Level.SEVERE, "Cannot listen to port " + PORT, e);
+            logger.log(Level.SEVERE, "Cannot listen to port " + port, e);
             return;
         }
         while (true) {
             try {
-                socket = serverSocket.accept();
-                logger.info("new client connected from " + socket.getInetAddress() + ":" + socket.getPort());
+                Socket socket = serverSocket.accept();
+                logger.info("new client connected from " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
                 final ClientHandler clientHandler = new ClientHandler(this, socket);
                 clientHandlers.add(clientHandler);
-                new Thread(clientHandler).start();
+                executorService.execute(clientHandler);
             } catch (IOException e) {
                 logger.log(Level.WARNING, "Client connection error", e);
             }
         }
     }
 
-    public void dispatchMessage(ClientHandler originator, String line) {
-        logger.fine("Dispatching message from " + originator);
+    /**
+     * Dispatch a message to all connected clients, except the sender
+     *
+     * @param sender  the client that is sending the message
+     * @param message the message
+     */
+    public void dispatchMessage(ClientHandler sender, String message) {
+        logger.fine("Dispatching message from " + sender);
         for (ClientHandler client : clientHandlers) {
-            if (client != originator) {
+            if (client != sender) {
                 try {
                     logger.fine("Dispatching to " + client);
-                    client.sendMessage(line);
+                    client.sendMessage(message);
                 } catch (IOException e) {
-                   logger.log(Level.WARNING, "Cannot send message to " + client + ": removing it", e);
-                   clientHandlers.remove(client);
+                    logger.log(Level.WARNING, "Cannot send message to " + client + ": removing it", e);
+                    removeClientHandler(client);
                 }
             }
         }
     }
 
-    public static void main(String args[]) {
-        new ChatServer().runServer();
+    /**
+     * Remove the ClientHandler for a disconnected client
+     *
+     * @param clientHandler the client to remove
+     */
+    public void removeClientHandler(ClientHandler clientHandler) {
+        clientHandlers.remove(clientHandler);
     }
+
 }
