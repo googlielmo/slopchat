@@ -1,4 +1,4 @@
-package io.github.googlielmo.minichat.server;
+package io.github.googlielmo.slopchat.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -10,6 +10,9 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * SLOP (Simple Line-Oriented Protocol) chat server
+ */
 public class ChatServer {
 
     private static final Logger logger = Logger.getLogger("ChatServer");

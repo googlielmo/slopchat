@@ -1,15 +1,16 @@
-package io.github.googlielmo.minichat.server;
+package io.github.googlielmo.slopchat.server;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Per-client receive/dispatch loop and send method.
+ * To be run as a separate thread.
  */
 class ClientHandler implements Runnable {
 
@@ -17,9 +18,9 @@ class ClientHandler implements Runnable {
 
     protected Socket socket;
 
-    BufferedReader reader;
+    BufferedReader socketReader;
 
-    DataOutputStream outputStream;
+    PrintWriter socketWriter;
 
     private ChatServer server;
 
@@ -31,15 +32,18 @@ class ClientHandler implements Runnable {
         this.name = "ClientHandler[" + socket.getInetAddress().getHostAddress() + ":" + socket.getPort() + "]";
     }
 
+    /**
+     * Receive/dispatch messages from this client
+     */
     public void run() {
         try {
             Thread.currentThread().setName(name);
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            outputStream = new DataOutputStream(socket.getOutputStream());
+            socketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            socketWriter = new PrintWriter(socket.getOutputStream());
 
             while (true) {
                 // receive message from network
-                String message = reader.readLine();
+                String message = socketReader.readLine();
                 logger.fine("Received : " + message);
                 if (message == null) {
                     logger.warning("`null` received, terminating client handler thread");
@@ -60,13 +64,17 @@ class ClientHandler implements Runnable {
         }
     }
 
+    /**
+     * Send a message to this client
+     * @param message the message
+     * @throws IOException
+     */
     public void sendMessage(String message) throws IOException {
         logger.fine("sendMessage: " + message);
-        outputStream.writeBytes(message + "\n");
-        outputStream.flush();
+        socketWriter.println(message);
+        socketWriter.flush();
     }
 
-    @Override
     public String toString() {
         return name;
     }

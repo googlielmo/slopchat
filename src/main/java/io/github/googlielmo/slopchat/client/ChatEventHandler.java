@@ -1,4 +1,4 @@
-package io.github.googlielmo.minichat.client;
+package io.github.googlielmo.slopchat.client;
 
 /**
  * A handler for chat events

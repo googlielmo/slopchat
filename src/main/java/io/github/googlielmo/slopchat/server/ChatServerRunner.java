@@ -1,8 +1,9 @@
-package io.github.googlielmo.minichat.server;
+package io.github.googlielmo.slopchat.server;
 
 /**
- * Chat server main class
+ * Chat server executable
  * Invoke main with arguments: [port]
+ * Default: 10000
  */
 public class ChatServerRunner {
 

@@ -1,4 +1,4 @@
-package io.github.googlielmo.minichat.client;
+package io.github.googlielmo.slopchat.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,6 +10,9 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * SLOP (Simple Line-Oriented Protocol) chat client
+ */
 public class ChatClient {
 
     private static final Logger logger = Logger.getLogger("ChatClient");
@@ -30,12 +33,22 @@ public class ChatClient {
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
+    /**
+     * Create a client for a SLOP chat server
+     * @param serverName server name or address
+     * @param port port number
+     * @param eventHandler a chat event handler
+     */
     public ChatClient(String serverName, int port, ChatEventHandler eventHandler) {
         this.serverName = serverName;
         this.port = port;
         this.eventHandler = eventHandler;
     }
 
+    /**
+     * Open the connection to the server
+     * @throws IOException
+     */
     public void connect() throws IOException {
         connected = false;
         try {
@@ -51,12 +64,25 @@ public class ChatClient {
         }
     }
 
+    /**
+     * Send a message to chat server
+     * @param message
+     */
     public void sendMessage(String message) {
+        if (!connected) {
+            throw new IllegalStateException("not connected");
+        }
         socketWriter.println(message);
         socketWriter.flush();
     }
 
+    /**
+     * Disconnect from server
+     */
     public void disconnect() {
+        if (!connected) {
+            throw new IllegalStateException("not connected");
+        }
         executorService.shutdownNow();
         if (socket != null) {
             try {
@@ -69,8 +95,14 @@ public class ChatClient {
         eventHandler.onDisconnect();
     }
 
+    /**
+     * Starts the message receiver thread
+     */
     private void startReceiver() {
         final Runnable receiver = () -> {
+            final String name = "Receiver[" + socket.getInetAddress().getHostAddress() + ":" + socket.getPort() + "]";
+            logger.fine("Starting " + name);
+            Thread.currentThread().setName(name);
             while (true) {
                 if (Thread.interrupted()) {
                     logger.fine("Receiver interrupted");
@@ -94,6 +126,9 @@ public class ChatClient {
         executorService.execute(receiver);
     }
 
+    /**
+     * @return whether this client is connected
+     */
     public boolean isConnected() {
         return connected;
     }
