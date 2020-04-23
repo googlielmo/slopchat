@@ -11,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * SLOP (Simple Line-Oriented Protocol) chat server
+ * SLOP (Simple Line Oriented Protocol) chat server
  */
 public class ChatServer {
 
@@ -89,5 +89,4 @@ public class ChatServer {
     public void removeClientHandler(ClientHandler clientHandler) {
         clientHandlers.remove(clientHandler);
     }
-
 }

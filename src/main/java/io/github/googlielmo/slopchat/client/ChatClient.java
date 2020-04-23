@@ -11,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * SLOP (Simple Line-Oriented Protocol) chat client
+ * SLOP (Simple Line Oriented Protocol) chat client
  */
 public class ChatClient {
 
@@ -111,9 +111,10 @@ public class ChatClient {
                 try {
                     String message = socketReader.readLine();
                     logger.fine("Received : " + message);
-                    // send message event
-                    eventHandler.onMessage(message);
-                    if (message == null) {
+                    if (message != null) {
+                        // send message event
+                        eventHandler.onMessage(message);
+                    } else {
                         logger.warning("`null` received, disconnecting");
                         disconnect();
                     }

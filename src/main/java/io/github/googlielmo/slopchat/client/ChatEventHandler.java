@@ -4,7 +4,6 @@ package io.github.googlielmo.slopchat.client;
  * A handler for chat events
  */
 public interface ChatEventHandler {
-
     /**
      * Server connection event
      */
@@ -20,5 +19,4 @@ public interface ChatEventHandler {
      * Server disconnection event
      */
     void onDisconnect();
-
 }
