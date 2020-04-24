@@ -1,15 +1,17 @@
-package io.github.googlielmo.slopchat.server;
+package io.github.googlielmo.slopchat.app.server;
+
+import io.github.googlielmo.slopchat.server.ChatServer;
 
 /**
  * Chat server executable
  * Invoke main with arguments: [port]
  * Default: 10000
  */
-public class ChatServerRunner {
+public class SlopchatServer {
 
     private int port = 10000;
 
-    private ChatServerRunner parseOptions(String[] args) {
+    private SlopchatServer parseOptions(String[] args) {
         if (args.length > 1) {
             System.out.println("Arguments: [port]");
             System.exit(1);
@@ -25,7 +27,7 @@ public class ChatServerRunner {
     }
 
     public static void main(String args[]) {
-        new ChatServerRunner()
+        new SlopchatServer()
                 .parseOptions(args)
                 .execute();
     }

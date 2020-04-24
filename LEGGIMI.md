@@ -61,7 +61,7 @@ Per compilare:
 
 Per lanciare il server:
 ```shell script
-> java -Djava.util.logging.config.file=./src/main/resources/logging.properties -cp ./target/slopchat-1.0-SNAPSHOT.jar io.github.googlielmo.slopchat.server.ChatServerRunner 10000
+> java -Djava.util.logging.config.file=./src/main/resources/logging.properties -cp ./target/slopchat-1.0-SNAPSHOT.jar io.github.googlielmo.slopchat.app.server.SlopchatServer 10000
 ```
 
 Puoi modificare il file `logging.properties` fornito con il progetto sotto `src/main/resources/logging.properties` o
@@ -80,7 +80,7 @@ Questo comando compila il codice, se necessario, e lancia un client per connette
 Su qualsiasi piattaforma (es. Windows) puoi lanciare il client con il comando seguente.
 
 ```shell script
-> java -Djava.util.logging.config.file=./src/main/resources/logging.properties -cp ./target/slopchat-1.0-SNAPSHOT.jar io.github.googlielmo.slopchat.client.ConsoleChat localhost 10000
+> java -Djava.util.logging.config.file=./src/main/resources/logging.properties -cp ./target/slopchat-1.0-SNAPSHOT.jar io.github.googlielmo.slopchat.app.client.Slopchat localhost 10000
 ```
 ## Usare il client e/o il server nel tuo codice
 

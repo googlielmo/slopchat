@@ -1,15 +1,18 @@
-package io.github.googlielmo.slopchat.client;
+package io.github.googlielmo.slopchat.app.client;
+
+import io.github.googlielmo.slopchat.client.ChatClient;
+import io.github.googlielmo.slopchat.client.ChatEventHandler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
- * Console chat main class
+ * Console client main class
  * Invoke main with arguments: [serverName] [port]
  * Defaults: "localhost" 10000
  */
-public class ConsoleChat implements ChatEventHandler {
+public class Slopchat implements ChatEventHandler {
 
     private String serverName = "localhost";
 
@@ -55,7 +58,7 @@ public class ConsoleChat implements ChatEventHandler {
         }
     }
 
-    private ConsoleChat parseOptions(String[] args) {
+    private Slopchat parseOptions(String[] args) {
         if (args.length > 2) {
             System.out.println("Arguments: [serverName] [port]");
             System.exit(1);
@@ -70,7 +73,7 @@ public class ConsoleChat implements ChatEventHandler {
     }
 
     public static void main(String[] args) throws IOException {
-        new ConsoleChat()
+        new Slopchat()
                 .parseOptions(args)
                 .execute();
     }

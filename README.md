@@ -55,7 +55,7 @@ To compile the code:
 
 To start the server:
 ```shell script
-> java -Djava.util.logging.config.file=./src/main/resources/logging.properties -cp ./target/slopchat-1.0-SNAPSHOT.jar io.github.googlielmo.slopchat.server.ChatServerRunner 10000
+> java -Djava.util.logging.config.file=./src/main/resources/logging.properties -cp ./target/slopchat-1.0-SNAPSHOT.jar io.github.googlielmo.slopchat.app.server.SlopchatServer 10000
 ```
 
 You can edit the sample `logging.properties` file in the project under `src/main/resources/logging.properties` or
@@ -74,7 +74,7 @@ The command above will compile the code and start a client for the service on lo
 On any platform (e.g., Windows) you can start the client manually with the following command. 
 
 ```shell script
-> java -Djava.util.logging.config.file=./src/main/resources/logging.properties -cp ./target/slopchat-1.0-SNAPSHOT.jar io.github.googlielmo.slopchat.client.ConsoleChat localhost 10000
+> java -Djava.util.logging.config.file=./src/main/resources/logging.properties -cp ./target/slopchat-1.0-SNAPSHOT.jar io.github.googlielmo.slopchat.app.client.Slopchat localhost 10000
 ```
 ## Using the client and/or the server from your own code
 
