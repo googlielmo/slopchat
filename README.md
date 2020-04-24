@@ -2,7 +2,8 @@
 
 # slopchat
 
-An exercise in socket programming in the Java programming language: Implementing a no-frills online chat system!
+An exercise in socket programming in the Java programming language: Implementing a no-frills, telnet-compatible
+online chat system!
 
 This project includes a basic implementation of the SLOP protocol in Java.
 
@@ -63,7 +64,13 @@ provide your own.
 
 ### Starting a client
 
-On Linux/Unix/Mac please use the provided `startClient.sh` script.
+Did you know SLOP is telnet-compatible? You can use the `telnet` command to chat.
+
+```shell script
+> telnet localhost 10000
+```
+
+Fancy trying the original slopchat client? On Linux/Unix/Mac please use the provided `startClient.sh` script.
 
 ```shell script
 > cd slopchat

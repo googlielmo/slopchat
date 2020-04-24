@@ -2,7 +2,7 @@
 
 # slopchat
 
-Un esercizio di socket programming in Java: implementiamo un sistema di chat senza fronzoli!
+Un esercizio di socket programming in Java: implementiamo un sistema di chat senza fronzoli, compatibile con telnet!
 
 Questo progetto include una implementazione base del protocollo SLOP in Java.
 
@@ -69,7 +69,13 @@ puntare a uno tuo.
 
 ### Lanciare un client
 
-Su Linux/Unix/Mac puoi usare lo script `startClient.sh`.
+Sapevi che SLOP è compatibile con telnet? Per chattare puoi utilizzare il seguente comando.
+
+```shell script
+> telnet localhost 10000
+```
+
+Se invece vuoi provare l'originale client slopchat, su Linux/Unix/Mac puoi usare lo script `startClient.sh`.
 
 ```shell script
 > cd slopchat

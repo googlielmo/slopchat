@@ -130,4 +130,43 @@ class ChatClientTest {
         assertTrue(countMessage == 1);
         assertEquals("test 2", lastMessage);
     }
+
+    @Test
+    void disconnect() throws IOException {
+        // given
+        client1.connect();
+
+        // when
+        client1.disconnect();
+
+        // then
+        assertTrue(countDisconnect == 1);
+        assertFalse(client1.isConnected());
+    }
+
+    @Test
+    void disconnectTwice() throws IOException {
+        // given
+        client1.connect();
+
+        // when
+        client1.disconnect();
+
+        // then
+        assertThrows(IllegalStateException.class, () -> {
+            client1.disconnect();
+        });
+    }
+
+    @Test
+    void disconnectUnconnected() throws IOException {
+        // given
+
+        // when
+
+        // then
+        assertThrows(IllegalStateException.class, () -> {
+            client1.disconnect();
+        });
+    }
 }
