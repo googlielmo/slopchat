@@ -2,17 +2,17 @@
 
 # slopchat
 
-An exercise in socket programming in the Java programming language.
+An exercise in socket programming in the Java programming language: Implementing a no-frills online chat system!
 
-This project includes a very simple chat implementation of the SLOP protocol in Java.
-
-A slopchat server listens to multiple connections on a given TCP port.
-
-A slopchat client connects to a server and can exchange SLOP messages with other clients.
+This project includes a basic implementation of the SLOP protocol in Java.
 
 ## The SLOP protocol
 
 SLOP stands for Simple Line Oriented Protocol.
+
+A slopchat server listens to multiple connections on a given TCP port.
+
+A slopchat client connects to a server and can exchange SLOP messages with other clients.
 
 Each chat message is represented as a single line string, i.e. a string of variable length terminated
 by a LF character.
@@ -78,4 +78,101 @@ On any platform (e.g., Windows) you can start the client manually with the follo
 ```
 ## Using the client and/or the server from your own code
 
-TBD
+You can embed a slopchat server or client in your own project.
+
+### Instantiating a server
+
+This is all you need to start serving slopchat clients:
+
+```java
+new ChatServer(port).serve();
+```
+
+The `serve()` method is not meant to return, therefore you may want to execute it in a separate thread.
+
+This implementation uses a thread-per-client approach, where a new dedicated thread is created
+to handle each connection for receiving and dispatching incoming messages.
+
+### Implementing a client
+
+To turn your app into a slopchat client you instantiate a `ChatClient`:
+
+```java
+    ChatClient client = new ChatClient(serverName, port, eventHandler);
+    client.connect();
+```
+
+In the snippet above `eventHandler` is your own implementation of the `ChatEventHandler` interface:
+
+```
+    /**
+     * Server connection event
+     */
+    void onConnect();
+
+    /**
+     * Incoming message event
+     * @param message the message
+     */
+    void onMessage(String message);
+
+    /**
+     * Server disconnection event
+     */
+    void onDisconnect();
+```
+
+When your client receives a message the `onMessage` method is invoked on your handler to pass it the incoming message.
+The `onConnect` and `onDisconnect` methods notify your handler about connection and disconnection events, respectively.
+
+After a successful connection with the server, your app can send a message by invoking the `sendMessage` method:
+
+```java
+    client.sendMessage(message);
+```
+
+Putting it all together, our console-based client looks like the following, error handling and all.
+
+```java
+    @Override
+    public void onConnect() {
+        System.out.println("Connected! ^C to quit");
+    }
+
+    @Override
+    public void onMessage(String message) {
+        // print incoming message to console
+        System.out.println(message);
+    }
+
+    @Override
+    public void onDisconnect() {
+        System.out.println("Disconnected from server, bye");
+        System.exit(0);
+    }
+
+    /**
+     * Connect to server and handle console input
+     * @throws IOException
+     */
+    private void execute() throws IOException {
+        BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
+
+        ChatClient client = new ChatClient(serverName, port, this);
+        try {
+            client.connect();
+        } catch (IOException e) {
+            System.out.println("Cannot connect to server, bye");
+            System.exit(1);
+        }
+
+        while (true) {
+            // read message from console
+            String message = consoleReader.readLine();
+            // send it to server
+            client.sendMessage(message);
+        }
+    }
+```
+
+That's it. Have fun with slopchat!
