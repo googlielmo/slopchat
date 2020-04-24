@@ -46,7 +46,7 @@ class ClientHandler implements Runnable {
                 String message = socketReader.readLine();
                 logger.fine("Received : " + message);
                 if (message == null) {
-                    logger.warning("`null` received, terminating client handler thread");
+                    logger.fine("`null` received, terminating client handler thread");
                     return;
                 }
                 // dispatch message to the other clients

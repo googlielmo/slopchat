@@ -70,7 +70,7 @@ public class ChatClient {
      */
     public void sendMessage(String message) {
         if (!connected) {
-            throw new IllegalStateException("not connected");
+            throw new IllegalStateException("Not connected");
         }
         socketWriter.println(message);
         socketWriter.flush();
@@ -81,7 +81,7 @@ public class ChatClient {
      */
     public void disconnect() {
         if (!connected) {
-            throw new IllegalStateException("not connected");
+            throw new IllegalStateException("Not connected");
         }
         executorService.shutdownNow();
         if (socket != null) {
@@ -115,12 +115,17 @@ public class ChatClient {
                         // send message event
                         eventHandler.onMessage(message);
                     } else {
-                        logger.warning("`null` received, disconnecting");
+                        logger.info("`null` received, disconnecting");
                         disconnect();
+                        break;
                     }
                 } catch (IOException e) {
-                    logger.log(Level.SEVERE, "Error receiving from server, terminating", e);
-                    disconnect();
+                    logger.log(Level.FINE, "Socket error", e);
+                    logger.info("Server dropped connection, disconnecting");
+                    if (isConnected()) {
+                        disconnect();
+                    }
+                    break;
                 }
             }
         };
