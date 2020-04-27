@@ -100,6 +100,49 @@ The `serve()` method is not meant to return, therefore you may want to execute i
 This implementation uses a thread-per-client approach, where a new dedicated thread is created
 to handle each connection for receiving and dispatching incoming messages.
 
+#### Changing the server behaviour
+
+Do you need a customized server? Perhaps you want to change or otherwise process incoming messages e.g., to implement a
+higher-level protocol or to add new functionalities, such as chatrooms, private messages, nicknames, etc.
+In order to do so you just need to implement the `MessageProcessor` interface, which allows you to control
+all inbound and outbound messages:
+
+```java
+    /**
+     * Process an incoming message.
+     * This method is invoked once per incoming message, before the message dispatching.
+     * @param message the original wire message
+     * @param sender the sender ClientHandler
+     * @return An optional string: the (possibly new) message to dispatch if present, or empty to ignore the message
+     */
+    Optional<String> processIncomingMessage(String message, ClientHandler sender);
+
+    /**
+     * Process an outgoing message.
+     * This method is called during the message dispatching, once for each connected client as recipient.
+     * @param message the message to send, already processed by {@link #processIncomingMessage(String, ClientHandler)}.
+     * @param sender the sender ClientHandler
+     * @param recipient the recipient ClientHandler
+     * @return An optional string: the (possibly new) message to send if present, or empty to suppress the sending
+     */
+    Optional<String> processSend(String message, ClientHandler sender, ClientHandler recipient);
+```
+
+You can pre-process each incoming message with the `processIncomingMessage` method.
+It has to return an `Optional<String>` that – if present – represents the message to dispatch to other clients.
+If for any reason the incoming message must be discarded (not dispatched), just return an `Optional.empty()`.
+
+Likewise, each outgoing message can be processed by implementing the `processSend` method, which is called once for
+each connected client as a recipient.
+An `Optional<String>` is returned that – if present – represents the message to send to the recipient. If `empty` the
+sending is cancelled.
+
+The default implementation for these methods is what you would expect.
+The `processIncomingMessage` method just returns the incoming message (no pre-processing).
+The `processSend` method checks that the sender and the recipient are different instances, and if so it returns the
+message unchanged. If sender and recipient are one and the same, an empty value is returned and the sending is
+cancelled.
+
 ### Implementing a client
 
 To turn your app into a slopchat client you instantiate a `ChatClient`:

@@ -50,7 +50,7 @@ class ClientHandler implements Runnable {
                     return;
                 }
                 // dispatch message to the other clients
-                server.dispatchMessage(this, message);
+                server.dispatchMessage(message, this);
             }
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error, disconnecting client", e);

@@ -9,7 +9,7 @@ Questo progetto include una implementazione base del protocollo SLOP in Java.
 ## Il protocollo SLOP
 
 SLOP sta per Simple Line Oriented Protocol (Semplice Protocollo Orientato alle Linee,
-o SPOL in Italiano se preferite).
+o SPOL in Italiano se preferisci).
 
 Un server slopchat riceve multiple connessioni su una data porta TCP (la porta di default è 10000).
 
@@ -105,6 +105,50 @@ Il metodo `serve` non è pensato per terminare, perciò probabilmente vorrai ese
 Questa implementazione usa un approccio thread-per-client, in cui viene creato un nuovo thread dedicato per
 gestire ciascuna connessione per ricevere e distribuire i messaggi in ingresso.
 
+#### Modificare il comportamento del server
+
+Vuoi personalizzare il server? Hai la possibilità di modificare o interpretare i messaggi, magari per implementare
+un protocollo di più alto livello o aggiungere funzionalità, ad es. chatroom, messaggi privati, nickname, ecc.
+Per far questo basta implementare l'interfaccia `MessageProcessor` che ti consente di controllare tutti i messaggi in
+ingresso e in uscita:
+
+```java
+    /**
+     * Process an incoming message.
+     * This method is invoked once per incoming message, before the message dispatching.
+     * @param message the original wire message
+     * @param sender the sender ClientHandler
+     * @return An optional string: the (possibly new) message to dispatch if present, or empty to ignore the message
+     */
+    Optional<String> processIncomingMessage(String message, ClientHandler sender);
+
+    /**
+     * Process an outgoing message.
+     * This method is called during the message dispatching, once for each connected client as recipient.
+     * @param message the message to send, already processed by {@link #processIncomingMessage(String, ClientHandler)}.
+     * @param sender the sender ClientHandler
+     * @param recipient the recipient ClientHandler
+     * @return An optional string: the (possibly new) message to send if present, or empty to suppress the sending
+     */
+    Optional<String> processSend(String message, ClientHandler sender, ClientHandler recipient);
+```
+
+Puoi preprocessare ogni messaggio che arriva al server mediante il metodo `processIncomingMessage`.
+Il metodo restituisce una `Optional<String>` che se presente costituisce il messaggio da propagare agli altri client.
+Se invece il messaggio ricevuto per qualsiasi motivo deve essere ignorato, ovvero non girato ad altri client,
+basterà restituire `Optional.empty()`.
+
+Analogamente, ciascun messaggio in uscita può essere processato implementando il metodo `processSend`, che viene
+chiamato una volta per ciascun client collegato al server come destinatario.
+Anche in questo caso il valore di ritorno è una `Optional<String>` che se presente costituisce il messaggio da inviare,
+o in caso sia `empty` segnala al server di annullare un particolare invio.
+
+L'implementazione di default di questi due metodi è molto semplice.
+Il metodo `processIncomingMessage` non fa altro che restituire il messaggio in arrivo senza alcuna elaborazione.
+Il metodo `processSend` invece controlla che il mittente sia diverso dal destinatario, e solo in questo caso
+restituisce il messaggio inalterato per l'invio al destinatario.
+Nel caso mittente e destinatario coincidano, l'invio viene soppresso.
+
 ### Implementare un client
 
 Per far diventare la tua app un client slopchat devi istanziare un `ChatClient`:
@@ -191,5 +235,5 @@ degli errori.
     }
 ```
 
-Questo è quanto. Divertitevi con slopchat!
+Questo è quanto. Divertiti con slopchat!
 
