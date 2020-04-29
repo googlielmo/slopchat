@@ -105,17 +105,17 @@ Il metodo `serve` non è pensato per terminare, perciò probabilmente vorrai ese
 Questa implementazione usa un approccio thread-per-client, in cui viene creato un nuovo thread dedicato per
 gestire ciascuna connessione per ricevere e distribuire i messaggi in ingresso.
 
-#### Modificare il comportamento del server
+#### Personalizzare il server
 
 Vuoi personalizzare il server? Hai la possibilità di modificare o interpretare i messaggi, magari per implementare
-un protocollo di più alto livello o aggiungere funzionalità, ad es. chatroom, messaggi privati, nickname, ecc.
+un protocollo di più alto livello o aggiungere funzionalità, per es. chatroom, messaggi privati, nickname, ecc.
 Per far questo basta implementare l'interfaccia `MessageProcessor` che ti consente di controllare tutti i messaggi in
 ingresso e in uscita:
 
 ```java
     /**
      * Process an incoming message.
-     * This method is invoked once per incoming message, before the message dispatching.
+     * This method is invoked once per incoming message, before message dispatching.
      * @param message the original wire message
      * @param sender the sender ClientHandler
      * @return An optional string: the (possibly new) message to dispatch if present, or empty to ignore the message
@@ -124,7 +124,7 @@ ingresso e in uscita:
 
     /**
      * Process an outgoing message.
-     * This method is called during the message dispatching, once for each connected client as recipient.
+     * This method is called during message dispatching, once for each connected client as recipient.
      * @param message the message to send, already processed by {@link #processIncomingMessage(String, ClientHandler)}.
      * @param sender the sender ClientHandler
      * @param recipient the recipient ClientHandler
@@ -136,7 +136,7 @@ ingresso e in uscita:
 Puoi preprocessare ogni messaggio che arriva al server mediante il metodo `processIncomingMessage`.
 Il metodo restituisce una `Optional<String>` che se presente costituisce il messaggio da propagare agli altri client.
 Se invece il messaggio ricevuto per qualsiasi motivo deve essere ignorato, ovvero non girato ad altri client,
-basterà restituire `Optional.empty()`.
+si deve restituire `Optional.empty()`.
 
 Analogamente, ciascun messaggio in uscita può essere processato implementando il metodo `processSend`, che viene
 chiamato una volta per ciascun client collegato al server come destinatario.
@@ -148,6 +148,12 @@ Il metodo `processIncomingMessage` non fa altro che restituire il messaggio in a
 Il metodo `processSend` invece controlla che il mittente sia diverso dal destinatario, e solo in questo caso
 restituisce il messaggio inalterato per l'invio al destinatario.
 Nel caso mittente e destinatario coincidano, l'invio viene soppresso.
+
+Per istanziare un server con un `MessageProcessor` personalizzato, lo si deve passare al costruttore dedicato.
+
+```java
+new ChatServer(port, myMessageProcessor).serve();
+```
 
 ### Implementare un client
 

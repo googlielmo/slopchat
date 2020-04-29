@@ -12,7 +12,7 @@ public interface MessageProcessor {
 
     /**
      * Process an incoming message.
-     * This method is invoked once per incoming message, before the message dispatching.
+     * This method is invoked once per incoming message, before message dispatching.
      * @param message the original wire message
      * @param sender the sender ClientHandler
      * @return An optional string: the (possibly new) message to dispatch if present, or empty to ignore the message
@@ -21,7 +21,7 @@ public interface MessageProcessor {
 
     /**
      * Process an outgoing message.
-     * This method is called during the message dispatching, once for each connected client as recipient.
+     * This method is called during message dispatching, once for each connected client as recipient.
      * @param message the message to send, already processed by {@link #processIncomingMessage(String, ClientHandler)}.
      * @param sender the sender ClientHandler
      * @param recipient the recipient ClientHandler

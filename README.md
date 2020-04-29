@@ -100,17 +100,17 @@ The `serve()` method is not meant to return, therefore you may want to execute i
 This implementation uses a thread-per-client approach, where a new dedicated thread is created
 to handle each connection for receiving and dispatching incoming messages.
 
-#### Changing the server behaviour
+#### Customizing the server
 
-Do you need a customized server? Perhaps you want to change or otherwise process incoming messages e.g., to implement a
-higher-level protocol or to add new functionalities, such as chatrooms, private messages, nicknames, etc.
-In order to do so you just need to implement the `MessageProcessor` interface, which allows you to control
+Do you need a customized server? Perhaps you want to change or otherwise process incoming messages, e.g., so to
+implement a higher-level protocol or to add new functionalities, such as chatrooms, private messages, nicknames, etc.
+In order to do so, you just need to implement the `MessageProcessor` interface, which allows you to control
 all inbound and outbound messages:
 
 ```java
     /**
      * Process an incoming message.
-     * This method is invoked once per incoming message, before the message dispatching.
+     * This method is invoked once per incoming message, before message dispatching.
      * @param message the original wire message
      * @param sender the sender ClientHandler
      * @return An optional string: the (possibly new) message to dispatch if present, or empty to ignore the message
@@ -119,7 +119,7 @@ all inbound and outbound messages:
 
     /**
      * Process an outgoing message.
-     * This method is called during the message dispatching, once for each connected client as recipient.
+     * This method is called during message dispatching, once for each connected client as recipient.
      * @param message the message to send, already processed by {@link #processIncomingMessage(String, ClientHandler)}.
      * @param sender the sender ClientHandler
      * @param recipient the recipient ClientHandler
@@ -130,7 +130,7 @@ all inbound and outbound messages:
 
 You can pre-process each incoming message with the `processIncomingMessage` method.
 It has to return an `Optional<String>` that – if present – represents the message to dispatch to other clients.
-If for any reason the incoming message must be discarded (not dispatched), just return an `Optional.empty()`.
+If for any reason the incoming message must be discarded (not dispatched), return `Optional.empty()`.
 
 Likewise, each outgoing message can be processed by implementing the `processSend` method, which is called once for
 each connected client as a recipient.
@@ -142,6 +142,12 @@ The `processIncomingMessage` method just returns the incoming message (no pre-pr
 The `processSend` method checks that the sender and the recipient are different instances, and if so it returns the
 message unchanged. If sender and recipient are one and the same, an empty value is returned and the sending is
 cancelled.
+
+To instantiate a server with your custom `MessageProcessor`, just pass it to the appropriate constructor.
+
+```java
+new ChatServer(port, myMessageProcessor).serve();
+```
 
 ### Implementing a client
 
